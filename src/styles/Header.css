@@ -1,0 +1,34 @@
+.menu li a {
+  text-decoration: none;
+}
+.profile {
+  position: absolute;
+  z-index: 1;
+  top: 40px;
+  right: 20px;
+  background-color: #323232;
+  list-style-type: none;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  width: 150px;
+}
+.profile a {
+  text-decoration: none;
+  color: rgb(150, 150, 150);
+}
+.profile a:hover {
+  color: white;
+  transition: 0.3s ease-in-out;
+}
+.search-bar {
+  width: 30rem;
+  padding: 0.4rem 1rem;
+  margin-top: 1.5rem;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+.search-bar > input {
+  border: none;
+  height: 2rem;
+  outline: none;
+  margin-left: 10px;
+  max-width: 200px;
+}
