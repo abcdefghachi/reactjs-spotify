@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./../styles/Login.css";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Link,
+  NavLink,
+  Route,
+} from "react-router-dom";
 import { app } from "../config/firebase.config";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
@@ -9,6 +16,7 @@ import { actionType } from "../context/reducer";
 import { validateUser } from "../api";
 import { MdOutlineMail } from "react-icons/md";
 import { FaRegEyeSlash } from "react-icons/fa";
+import Singup from "./Signup";
 
 export default function Login({ setAuth }) {
   const firebaseAuth = getAuth(app);
@@ -156,10 +164,10 @@ export default function Login({ setAuth }) {
                   onChange={handleChange}
                 />
 
-                <MdOutlineMail
+                {/* <MdOutlineMail
                   className="icon"
                   style={{ top: errors.password ? "26%" : "60%" }}
-                />
+                /> */}
 
                 {errors.email && (
                   <p
@@ -185,12 +193,12 @@ export default function Login({ setAuth }) {
                   onChange={handleChange}
                 />
 
-                <FaRegEyeSlash
+                {/* <FaRegEyeSlash
                   className="icon"
                   style={{
                     top: errors.password ? "41%" : "67%",
                   }}
-                />
+                /> */}
 
                 {errors.password && (
                   <p
@@ -227,7 +235,14 @@ export default function Login({ setAuth }) {
           <div className="hr"></div>
 
           <div className="last text-center my-1 mx-0">
-            <span>Don't you have an account?</span>
+            <span>Don't you have an account?</span>{" "}
+            <NavLink
+              to="/signup"
+              className="text-light text-decoration-underline"
+              style={{ cursor: "pointer" }}
+            >
+              Signup for Spotify
+            </NavLink>
           </div>
         </div>
       </section>

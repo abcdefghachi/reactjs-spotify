@@ -1,0 +1,12 @@
+.dashboard-menu a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 15px;
+}
+.dashboard-menu a:hover {
+  color: black;
+  background-color: rgb(203, 203, 203);
+  border-radius: 20px;
+}

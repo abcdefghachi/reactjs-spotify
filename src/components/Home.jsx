@@ -1,6 +1,7 @@
 import React from "react";
 import "./../styles/Home.css";
 import Header from "./Header";
+import Playing from "./Playing";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
       }}
     >
       <Header />
+      <Playing />
     </div>
   );
 }

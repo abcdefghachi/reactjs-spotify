@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
 
 // user authentication route
 const userRoute = require("./server/routes/auth");
-app.use("/api/users", userRoute);
+app.use("/api/users/", userRoute);
 
 // Artist Routes
 const artistsRoutes = require("./server/routes/artists");

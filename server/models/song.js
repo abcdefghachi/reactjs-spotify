@@ -10,6 +10,10 @@ const songSchema = mongoose.Schema(
       type: String,
       require: true,
     },
+    songURL: {
+      type: String,
+      require: true,
+    },
     album: {
       type: String,
     },

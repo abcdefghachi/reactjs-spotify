@@ -22,16 +22,16 @@ function Header() {
     navigate("/login", { replace: true });
   };
   return (
-    <header className="d-flex align-items-center w-100 py-2 px-4 py-md-2 px-md-6">
+    <header className="d-flex align-items-center w-100 py-2 px-4 py-md-2 px-md-6 bg-black">
       <img
-        src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_White.png"
+        src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png"
         alt=""
         style={{ width: "180px" }}
       />
 
       <ul className="menu d-flex justify-content-center align-items-center list-unstyled">
         <li className="mx-3 pt-3 fs-5" style={{ textDecoration: "none" }}>
-          <NavLink to={"/home"} style={{ color: "#e5e5e5" }}>
+          <NavLink to={"/"} style={{ color: "#e5e5e5" }}>
             Home
           </NavLink>
         </li>
@@ -41,10 +41,16 @@ function Header() {
           </NavLink>
         </li>
         <li className="mx-3 pt-3 fs-5">
+          <NavLink to={"/musics"} style={{ color: "#e5e5e5" }}>
+            PostCard
+          </NavLink>
+        </li>
+        {/* <li className="mx-3 pt-3 fs-5">
           <NavLink to={"/premium"} style={{ color: "#e5e5e5" }}>
             Premium
           </NavLink>
-        </li>
+        </li> */}
+
         <div className="search-bar bg-white d-flex align-items-center rounded-pill">
           <FaSearch className="text-dark" />
           <input type="text" placeholder="Artists , songs, musics" />
@@ -63,15 +69,15 @@ function Header() {
           style={{ width: "50px" }}
         />
         <div className="d-flex flex-column align-items-start pt-1">
-          <p className="fw-bold fs-5 mb-0">{user?.user?.name}</p>
-          <p>
+          <p className="fw-bold fs-6 mb-0">{user?.user?.name}</p>
+          <p className="fs-6">
             Premium Member
             <FaCrown className="text-warning ms-2" />{" "}
           </p>
         </div>
 
         {isMenu && (
-          <div className="profile p-3 d-flex flex-column align-items-start">
+          <div className="profile p-2 d-flex flex-column align-items-start">
             <NavLink to={"/userProfile"}>
               <p>Profile</p>
             </NavLink>

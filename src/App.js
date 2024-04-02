@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import Login from "./components/Login";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useNavigate,
+  Navigate,
 } from "react-router-dom";
 import Home from "./components/Home";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 import { app } from "./config/firebase.config";
 import { getAuth } from "firebase/auth";
 import { AnimatePresence } from "framer-motion";
@@ -19,7 +20,6 @@ import { Dashboard } from "./components";
 
 function App() {
   const firebaseAuth = getAuth(app);
-  const navigate = useNavigate();
   const [{ user }, dispatch] = useStateValue();
 
   const [auth, setAuth] = useState(
@@ -45,10 +45,9 @@ function App() {
           type: actionType.SET_USER,
           user: null,
         });
-        navigate("/login");
       }
     });
-  }, [firebaseAuth, navigate, dispatch]);
+  }, [firebaseAuth, dispatch]);
 
   return (
     <AnimatePresence>
@@ -60,9 +59,16 @@ function App() {
         }}
       >
         <Routes>
-          <Route path="/login" element={<Login setAuth={setAuth} />} />
-          <Route path="/*" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/dashboard/*" element={<Dashboard />} />
+          <Route
+            path="/login"
+            element={auth ? <Navigate to="/" /> : <Login setAuth={setAuth} />}
+          />
+          <Route
+            path="/signup"
+            element={auth ? <Navigate to="/" /> : <Signup />}
+          />
         </Routes>
       </div>
     </AnimatePresence>
