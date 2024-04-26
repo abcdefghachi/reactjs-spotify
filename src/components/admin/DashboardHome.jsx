@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
-import { useStateValue } from "../../context/StateProvider";
+import { useStateValue } from "../../context/stateProvider";
 import { getAllUsers } from "../../api";
-import Playing from "../Playing";
 
 export const DashboardCard = ({ icon, name }) => {
   return (

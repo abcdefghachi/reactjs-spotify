@@ -2,6 +2,7 @@
   cursor: pointer;
   border-radius: 2px;
   display: flex;
+  width: 100%;
 }
 .songcard:hover {
   background-color: rgb(90, 89, 89);

@@ -32,3 +32,6 @@
   margin-left: 10px;
   max-width: 200px;
 }
+.change-page:hover {
+  color: white;
+}

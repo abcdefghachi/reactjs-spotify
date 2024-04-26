@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./../styles/Signup.css";
+import "../../styles/Signup.css";
 import { MdOutlineMail } from "react-icons/md";
 import { FaRegEyeSlash, FaRegUser } from "react-icons/fa";
 import {
@@ -10,13 +10,62 @@ import {
   NavLink,
 } from "react-router-dom";
 import Login from "./Login";
+// import { signUpUser } from "../api";
+import { useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { actionType } from "../../context/reducer";
+import { useStateValue } from "../../context/stateProvider";
+import { app } from "../../config/firebase.config";
+import { validateUser } from "../../api";
 
-export default function Singup() {
+export default function Singup(setAuth) {
+  const firebaseAuth = getAuth(app);
+  const navigate = useNavigate();
+  const [{ user }, dispatch] = useStateValue();
+
+  const createAccount = async () => {
+    try {
+      const userCred = await createUserWithEmailAndPassword(
+        firebaseAuth,
+        formData.email,
+        formData.password
+      );
+
+      if (userCred) {
+        setAuth(true);
+        window.localStorage.setItem("auth", "true");
+
+        firebaseAuth.onAuthStateChanged((userCred) => {
+          if (userCred) {
+            userCred.getIdToken().then((token) => {
+              validateUser(token).then((data) => {
+                dispatch({
+                  type: actionType.SET_USER,
+                  user: data.user,
+                });
+              });
+            });
+            navigate("/", { replace: true });
+          } else {
+            setAuth(false);
+            dispatch({
+              type: actionType.SET_USER,
+              user: null,
+            });
+            navigate("/login");
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error creating account:", error);
+    }
+  };
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
-    username: "",
+    name: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -28,13 +77,13 @@ export default function Singup() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = {};
 
     if (!formData.email.trim()) {
       validationErrors.email = "* Yêu cầu nhập email";
-    } else if (!/\S+@\S\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       validationErrors.email = "* Email không đúng định dạng";
     }
 
@@ -55,14 +104,18 @@ export default function Singup() {
         "Mật khẩu không đúng , xin mời nhập lại";
     }
 
-    if (!formData.username.trim()) {
-      validationErrors.username = "* Yêu cầu nhập tên";
+    if (!formData.name.trim()) {
+      validationErrors.name = "* Yêu cầu nhập tên";
     }
 
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      window.location.href = "/spotify";
+      try {
+        navigate("/");
+      } catch (error) {
+        console.error("Đăng ký thất bại:", error);
+      }
     }
   };
   return (
@@ -112,10 +165,10 @@ export default function Singup() {
                   placeholder="Email"
                   onChange={handleChange}
                 />
-                <MdOutlineMail
+                {/* <MdOutlineMail
                   className="icon"
                   style={{ top: errors.password ? "40%" : "64%" }}
-                />
+                /> */}
 
                 {errors.email && (
                   <p
@@ -143,10 +196,10 @@ export default function Singup() {
                   placeholder="Create a password"
                   onChange={handleChange}
                 />
-                <FaRegEyeSlash
+                {/* <FaRegEyeSlash
                   className="icon"
                   style={{ top: errors.password ? "40%" : "65%" }}
-                />
+                /> */}
 
                 {errors.password && (
                   <p
@@ -175,10 +228,10 @@ export default function Singup() {
                   onChange={handleChange}
                 />
 
-                <FaRegEyeSlash
+                {/* <FaRegEyeSlash
                   className="icon"
                   style={{ top: errors.password ? "64%" : "68%" }}
-                />
+                /> */}
 
                 {errors.confirmPassword && (
                   <p
@@ -202,15 +255,15 @@ export default function Singup() {
                 </label>
                 <input
                   type="text"
-                  name="username"
-                  placeholder="Enter  your username"
+                  name="name"
+                  placeholder="Enter  your name"
                   onChange={handleChange}
                 />
-                <FaRegUser
+                {/* <FaRegUser
                   className="icon"
                   style={{ top: errors.password ? "40%" : "65%" }}
-                />
-                {errors.username && (
+                /> */}
+                {errors.name && (
                   <p
                     className="text-danger fw-normal py-1 px-2"
                     style={{
@@ -218,31 +271,16 @@ export default function Singup() {
                       borderBottom: "3px solid red",
                     }}
                   >
-                    {errors.username}
+                    {errors.name}
                   </p>
                 )}
-              </div>
-
-              <div className="text-light my-2 d-flex justify-content-between">
-                <div className="gender">
-                  <input type="radio" id="male" name="gender" />
-                  <label htmlFor="male" className="ms-2">
-                    Male
-                  </label>
-                </div>
-                <div className="gender">
-                  <input type="radio" id="female" name="gender" />
-                  <label htmlFor="female" className="ms-2">
-                    Female
-                  </label>
-                </div>
               </div>
 
               <p className="text-light fw-lighter">
                 We may send you an email to confirm your singup
               </p>
 
-              <button>Signup</button>
+              <button onClick={createAccount}>Signup</button>
             </form>
           </div>
 

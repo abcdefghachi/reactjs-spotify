@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const user = require("../models/users");
+const { FaUserCircle } = require("react-icons/fa");
 
 const admin = require("../config/firebase.config");
 
@@ -11,19 +12,18 @@ router.get("/login", async (req, res) => {
   try {
     const decodeValue = await admin.auth().verifyIdToken(token);
     if (!decodeValue) {
-      return res.status(505).json({ message: "Un Authorized" });
+      return res.status(500).json({ message: "Unauthorized" }); // Change status to 500
     } else {
       const userExists = await user.findOne({ user_id: decodeValue.user_id });
       if (!userExists) {
-        newUserData(decodeValue, req, res);
+        await newUserData(decodeValue, req, res);
       } else {
-        updateNewUserData(decodeValue, req, res);
+        await updateNewUserData(decodeValue, req, res);
       }
     }
   } catch (error) {
-    return res.status(505).json({ message: error });
+    return res.status(500).json({ message: error.message }); // Send error message
   }
-  //   return res.send(token);
 });
 
 const newUserData = async (decodeValue, req, res) => {
@@ -62,18 +62,69 @@ const updateNewUserData = async (decodeValue, req, res) => {
   }
 };
 
-router.get("/getUser", async (req, res) => {
+router.get("/getUsers", async (req, res) => {
   const options = {
     sort: {
       createdAt: 1,
     },
   };
-  const cursor = await user.find(options);
-  if (cursor) {
-    res.status(200).send({ success: true, data: cursor });
+  const data = await user.find({}, null, options);
+  if (data.length > 0) {
+    return res.status(200).send({ success: true, user: data });
   } else {
-    res.status(400).send({ success: false, msg: "No data found" });
+    return res.status(400).send({ success: false, msg: "No data found" });
   }
 });
+
+router.get("/getAnUser/:userId", async (req, res) => {
+  const filter = { _id: req.params.userId };
+
+  const data = await user.findOne(filter);
+
+  if (data) {
+    return res.status(200).send({ success: true, user: data });
+  } else {
+    return res.status(400).send({ success: false, msg: "Data not found" });
+  }
+});
+
+router.put("/updateRole/:userId", async (req, res) => {
+  const filter = { _id: req.params.userId };
+  const role = req.body.data.role;
+
+  try {
+    const result = await user.findOneAndUpdate(filter, { role: role });
+    res.status(200).send({ user: result });
+  } catch (error) {
+    res.status(400).send({ success: false, msg: error });
+  }
+});
+
+router.delete("/deleteUser/:userId", async (req, res) => {
+  const filter = { _id: req.params.userId };
+
+  const result = await user.deleteOne(filter);
+  if (result.deletedCount === 1) {
+    res.status(200).send({ success: true, msg: "User removed" });
+  } else {
+    res.status(400).send({ success: false, msg: "Data not found" });
+  }
+});
+
+// router.get("/getUsers", async (req, res) => {
+//   const options = {
+//     // sort returned documents in ascending order
+//     sort: { createdAt: 1 },
+//     // Include only the following
+//     // projection : {}
+//   };
+
+//   const cursor = await user.find(options);
+//   if (cursor.length > 0) {
+//     res.status(200).send({ success: true, data: cursor });
+//   } else {
+//     res.status(200).send({ success: true, msg: "No Data Found" });
+//   }
+// });
 
 module.exports = router;

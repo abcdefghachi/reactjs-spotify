@@ -4,4 +4,11 @@ export const initialState = {
   allSongs: null,
   allArtists: null,
   allAlbums: null,
+  filterTerm: "all",
+  artistfilter: null,
+  languageFilter: null,
+  albumFilter: null,
+  alertTYpe: null,
+  isSongPlaying: false,
+  songIndex: 0,
 };

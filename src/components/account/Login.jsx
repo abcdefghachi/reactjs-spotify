@@ -1,54 +1,44 @@
 import React, { useEffect, useState } from "react";
-import "./../styles/Login.css";
+import "../../styles/Login.css";
 import {
   BrowserRouter as Router,
-  Routes,
-  Link,
   NavLink,
-  Route,
+  useNavigate,
 } from "react-router-dom";
-import { app } from "../config/firebase.config";
-import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
+import { app } from "../../config/firebase.config";
+import {
+  GoogleAuthProvider,
+  getAuth,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from "react-router-dom";
-import { useStateValue } from "../context/StateProvider";
-import { actionType } from "../context/reducer";
-import { validateUser } from "../api";
-import { MdOutlineMail } from "react-icons/md";
-import { FaRegEyeSlash } from "react-icons/fa";
-import Singup from "./Signup";
+import { useStateValue } from "../../context/stateProvider";
+import { actionType } from "../../context/reducer";
+import { validateUser } from "../../api";
 
 export default function Login({ setAuth }) {
   const firebaseAuth = getAuth(app);
   const provider = new GoogleAuthProvider();
-
   const navigate = useNavigate();
-  const [{ user }, dispath] = useStateValue();
+  const [{ user }, dispatch] = useStateValue();
 
   const loginWithGoogle = async () => {
     await signInWithPopup(firebaseAuth, provider).then((userCred) => {
       if (userCred) {
         setAuth(true);
         window.localStorage.setItem("auth", "true");
-
         firebaseAuth.onAuthStateChanged((userCred) => {
           if (userCred) {
             userCred.getIdToken().then((token) => {
-              // console.log(token);
               validateUser(token).then((data) => {
-                dispath({
-                  type: actionType.SET_USER,
-                  user: data,
-                });
+                dispatch({ type: actionType.SET_USER, user: data.user });
               });
             });
             navigate("/", { replace: true });
           } else {
             setAuth(false);
-            dispath({
-              type: actionType.SET_USER,
-              user: null,
-            });
+            dispatch({ type: actionType.SET_USER, user: null });
             navigate("/login");
           }
         });
@@ -56,47 +46,88 @@ export default function Login({ setAuth }) {
     });
   };
 
-  useEffect(() => {
-    if (window.localStorage.getItem("auth") === "true") {
-      navigate("/", { replace: true });
-    }
-  }, []);
+  const loginAccount = async () => {
+    try {
+      // Kiểm tra email có hợp lệ không
+      if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        setErrors({ emailOrPassword: "Email không hợp lệ" });
+        return;
+      }
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+      // Kiểm tra mật khẩu
+      if (formData.password.trim().length < 6) {
+        setErrors({ emailOrPassword: "Mật khẩu không hợp lệ" });
+        return;
+      }
+
+      // Đăng nhập với email và mật khẩu
+      const userCred = await signInWithEmailAndPassword(
+        firebaseAuth,
+        formData.email,
+        formData.password
+      );
+
+      // Kiểm tra người dùng tồn tại trong Firebase
+      if (userCred) {
+        setAuth(true);
+        window.localStorage.setItem("auth", "true");
+        userCred.user.getIdToken().then((token) => {
+          validateUser(token).then((data) => {
+            dispatch({ type: actionType.SET_USER, user: data.user });
+          });
+        });
+        navigate("/", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error logging in:", error);
+      if (
+        error.code === "auth/invalid-email" ||
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
+      ) {
+        setErrors({ emailOrPassword: "Email hoặc mật khẩu không đúng" });
+      } else {
+        setErrors({ general: "Đã xảy ra lỗi. Vui lòng thử lại sau." });
+      }
+    }
+  };
+
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
+    setErrors({});
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = {};
+
     if (!formData.email.trim()) {
       validationErrors.email = "* Yêu cầu nhập email";
-    } else if (!/\S+@\S\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       validationErrors.email = "* Email không đúng định dạng";
     }
 
     if (!formData.password.trim()) {
       validationErrors.password = "* Yêu cầu nhập mật khẩu";
     } else if (formData.password.length < 10) {
-      validationErrors.password = "Mật khẩu sai . Xin mời nhập lại";
+      validationErrors.password = "Mật khẩu hoặc email sai . Xin mời nhập lại";
     }
 
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      alert("Login sucess");
+      try {
+        await loginAccount();
+      } catch (error) {
+        console.error("Đăng nhập thất bại:", error);
+      }
     }
   };
+
   return (
     <div>
       <header>
@@ -119,11 +150,7 @@ export default function Login({ setAuth }) {
       >
         <div
           className="main my-5 mx-0 p-2 bg-dark"
-          style={{
-            width: "734px",
-            height: "810px",
-            borderRadius: "5px",
-          }}
+          style={{ width: "734px", height: "810px", borderRadius: "5px" }}
         >
           <h1 className="text-center my-5 mx-0 text-light fs-1">
             Login in to Spotify
@@ -133,6 +160,7 @@ export default function Login({ setAuth }) {
             <button
               className="a-c-btn text-center p-2 my-1 mx-0 text-light fs-6"
               id="google"
+              onClick={loginWithGoogle}
             >
               <img
                 src="./../image/google.png"
@@ -140,7 +168,7 @@ export default function Login({ setAuth }) {
                 style={{ width: "50px" }}
               />
               <FcGoogle className="me-2" />
-              <span onClick={loginWithGoogle}>Log in with Google</span>
+              <span>Log in with Google</span>
             </button>
           </div>
 
@@ -163,11 +191,6 @@ export default function Login({ setAuth }) {
                   name="email"
                   onChange={handleChange}
                 />
-
-                {/* <MdOutlineMail
-                  className="icon"
-                  style={{ top: errors.password ? "26%" : "60%" }}
-                /> */}
 
                 {errors.email && (
                   <p
@@ -193,13 +216,6 @@ export default function Login({ setAuth }) {
                   onChange={handleChange}
                 />
 
-                {/* <FaRegEyeSlash
-                  className="icon"
-                  style={{
-                    top: errors.password ? "41%" : "67%",
-                  }}
-                /> */}
-
                 {errors.password && (
                   <p
                     className="text-danger fw-normal py-1 px-2"
@@ -213,19 +229,11 @@ export default function Login({ setAuth }) {
                 )}
               </div>
 
-              <div className="switch m-0 p-0">
-                <input type="checkbox" name="" id="switch" />
-                <label htmlFor="switch"></label>
-                <span>Remember me</span>
-              </div>
-
               <button type="submit">Login</button>
 
               <a
                 className="d-block text-center text-light fw-medium text-decoration-underline"
-                style={{
-                  cursor: "pointer",
-                }}
+                style={{ cursor: "pointer" }}
               >
                 Forgot password
               </a>
